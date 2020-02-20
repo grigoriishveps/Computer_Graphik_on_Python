@@ -1,22 +1,11 @@
-
-from numpy import (linspace, logspace, zeros, ones, outer, meshgrid,
-                   pi, sin, cos, sqrt, exp)
+from numpy import (linspace, pi)
 import numpy as np
-from numpy.random import normal
-import pylab
-from mpl_toolkits.mplot3d import axes3d
-from numpy import *
 import matplotlib.pyplot as plt
-
-cornerPoints = [
-    [0, 0],
-    [0, 1],
-    [1, 1],
-    [1, 0]]
+from mpl_toolkits.mplot3d import Axes3D
 
 # тестовые координаты из учебника
-print("use basic coords> y,n?")
-#start = input()
+print("use basic coords y,n?")
+# start = input()
 start = 'y'
 if (start == "y"):
     x1, y1, z1 = 0, 0, 1
@@ -41,16 +30,17 @@ assotiationСoordSystem = np.array([
     [x4, y4, z4]])
 
 
-def appendHvector(coords):
-    b = np.array([[1]*len(coords)]).transpose()
-    res = np.append(coords, b, axis=1)
-    return res
+def append_hvector(coords):
+    b = np.array([[1] * len(coords)]).transpose()
+    return np.append(coords, b, axis=1)
+
 
 def remove_last(x):
-    #return x[..., :-1]
+    # return x[..., :-1]
     return np.delete(x, 3, axis=1)
 
-def rotationRelativeX(obj, angle):
+
+def rotation_relativeX(obj, angle):
     xOs = np.array([
         [1, 0, 0, 0],
         [0, np.cos(angle * (pi / 180)), np.sin(angle * (pi / 180)), 0],
@@ -59,7 +49,8 @@ def rotationRelativeX(obj, angle):
     result = np.dot(obj, xOs)
     return result
 
-def rotationRelativeY(obj, angle):
+
+def rotation_relativeY(obj, angle):
     yOs = np.array([
         [np.cos(angle * (pi / 180)), 0, -np.sin(angle * (pi / 180)), 0],
         [0, 1, 0, 0],
@@ -69,26 +60,27 @@ def rotationRelativeY(obj, angle):
     return result
 
 
-assotiationСoordSystem = remove_last(rotationRelativeX(appendHvector(assotiationСoordSystem), 0))
-assotiationСoordSystem = remove_last(rotationRelativeY(appendHvector(assotiationСoordSystem), 0))
-print(assotiationСoordSystem)
+assotiationСoordSystem = remove_last(rotation_relativeX(append_hvector(assotiationСoordSystem), 0))
+assotiationСoordSystem = remove_last(rotation_relativeY(append_hvector(assotiationСoordSystem), 0))
+
+
 def f(u, w, coordMatrix):
-    firstMatrix = np.array([1 - u, u])
-    lastMatrix = np.array([[1 - w], [w]])
+    first_matrix = np.array([1 - u, u])
+    last_matrix = np.array([[1 - w], [w]])
     res = []
-    for i in range(3):
-        middleMatrix = np.array([[coordMatrix[0][i], coordMatrix[1][i]],
-                                 [coordMatrix[3][i], coordMatrix[2][i]]])
-        result1 = np.dot(firstMatrix, middleMatrix)
-        result2 = np.dot(result1, lastMatrix)
+    for t in range(3):
+        middle_matrix = np.array([[coordMatrix[0][t], coordMatrix[1][t]],
+                                  [coordMatrix[3][t], coordMatrix[2][t]]])
+        result1 = np.dot(first_matrix, middle_matrix)
+        result2 = np.dot(result1, last_matrix)
         res.append(result2[0])
     return res
+
+
 # создаем 3д пространство
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-
 a = assotiationСoordSystem
-print(a)
 '''X = [x3, x4, x1, x2, x3]
 Y = [y3, y4, y1, y2, y3]
 Z = [z3, z4, z1, z2, z3]'''
@@ -107,15 +99,15 @@ ax.plot(X, Y, Z)
 
 # N - количество точек на поверхности
 N = 15
-u = linspace(0, 1, N)
+dots = linspace(0, 1, N)
 
 # декартово произведение всех возможных точек билинейной поверхности
-buf = np.transpose([np.tile(u, len(u)), np.repeat(u, len(u))])
+buf = np.transpose([np.tile(dots, len(dots)), np.repeat(dots, len(dots))])
 
 # цикл отрисовки каждой точки билинейной повехрности
 for i in range(len(buf)):
-    ax.scatter(f(buf[i][0], buf[i][1], assotiationСoordSystem)[0], f(buf[i][0], buf[i][1], assotiationСoordSystem)[1],
-               f(buf[i][0], buf[i][1], assotiationСoordSystem)[2])
+    xyz = f(buf[i][0], buf[i][1], assotiationСoordSystem)
+    ax.scatter(xyz[0], xyz[1], xyz[2])
 
-#print(f(0.5, 0.5, assotiationСoordSystem))
+# print(f(0.5, 0.5, assotiationСoordSystem))
 plt.show()
