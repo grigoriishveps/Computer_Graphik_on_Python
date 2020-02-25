@@ -7,7 +7,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+# exclude .idea
+.idea
 # Distribution / packaging
 .Python
 build/
@@ -196,3 +197,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 .gitignore
+.idea/sonarlint/
