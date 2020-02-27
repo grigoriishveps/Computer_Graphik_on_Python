@@ -63,4 +63,4 @@ if __name__ == '__main__':
                     (40, 4), (40, 14), (43, 17)])
     x = ctr[:, 0]
     y = ctr[:, 1]
-computer_and_draw_bspline(x, y)
+    computer_and_draw_bspline(x, y)
