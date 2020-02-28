@@ -58,9 +58,14 @@ def computer_and_draw_bspline(x, y):
     plt.show()
 
 
+
 if __name__ == '__main__':
     ctr = np.array([(50, 25), (59, 12), (50, 10), (57, 2),
                     (40, 4), (40, 14), (43, 17)])
     x = ctr[:, 0]
     y = ctr[:, 1]
+    print(x)
+    print(y)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     computer_and_draw_bspline(x, y)
