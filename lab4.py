@@ -8,6 +8,9 @@ import numpy as np
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+Info_x = []
+Info_y = []
+
 
 class Dot:
     def __init__(self, x_coord: float, y_coord: float):
@@ -22,10 +25,6 @@ class Line:
     def __init__(self, start: Dot, end: Dot):
         self.start = start
         self.end = end
-
-
-# def convert_to_coord(list_of_lines: List[Line]):
-#     return [[line.start.x, line.start.y] for line in list_of_lines]
 
 
 def convert_to_figure(list_of_coord: List[List[float]]):
@@ -43,7 +42,6 @@ def is_inside(point: Dot, line: Line):
 
 
 def find_point_of_intersection(first_line: Line, second_line: Line):
-
     num = (first_line.start.x * first_line.end.y - first_line.start.y * first_line.end.x) * (
             second_line.start.x - second_line.end.x) - (
                   first_line.start.x - first_line.end.x) * (
@@ -89,40 +87,6 @@ def clip(dot_list: List[Dot], clipping_area: List[Line]):
     return result
 
 
-def clip_old(subjectPolygon, clipPolygon):
-    def inside(p):
-        return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
-
-    def computeIntersection():
-        dc = [cp1[0] - cp2[0], cp1[1] - cp2[1]]
-        dp = [s[0] - e[0], s[1] - e[1]]
-        n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0]
-        n2 = s[0] * e[1] - s[1] * e[0]
-        n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0])
-        return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
-
-    outputList = subjectPolygon
-    cp1 = clipPolygon[-1]
-
-    for clipVertex in clipPolygon:
-        cp2 = clipVertex
-        inputList = outputList
-        outputList = []
-        s = inputList[-1]
-
-        for subjectVertex in inputList:
-            e = subjectVertex
-            if inside(e):
-                if not inside(s):
-                    outputList.append(computeIntersection())
-                outputList.append(e)
-            elif inside(s):
-                outputList.append(computeIntersection())
-            s = e
-        cp1 = cp2
-    return (outputList)
-
-
 def define_interface():
     list = root.grid_slaves()
     for l in list:
@@ -133,41 +97,41 @@ def define_interface():
     x_entry = []
     y_entry = []
 
-    # k = int(subjectPolygon_tk.get())
-    # j = int(clipPolygon_tk.get())
+    k = int(subjectPolygon_tk.get())
+    j = int(clipPolygon_tk.get())
     # Test data
-    k = 4
-    j = 4
+    # k = 4
+    # j = 9
     main_label1 = Label(text="Координаты фигуры:")
     main_label1.grid(row=0, column=0, columnspan=4)
 
     for i in range(k):
-        x.append(StringVar(0))
-        y.append(StringVar(0))
+        Info_x.append(StringVar(0))
+        Info_y.append(StringVar(0))
 
         x_label.append(Label(text="x:"))
         x_label[i].grid(row=i + 2, column=0, sticky="w")
-        x_entry.append(Entry(textvariable=x[i]))
+        x_entry.append(Entry(textvariable=Info_x[i]))
         x_entry[i].grid(row=i + 2, column=1, padx=5, pady=5)
         y_label.append(Label(text="y:"))
         y_label[i].grid(row=i + 2, column=2, sticky="w")
-        y_entry.append(Entry(textvariable=y[i]))
+        y_entry.append(Entry(textvariable=Info_y[i]))
         y_entry[i].grid(row=i + 2, column=3, padx=5, pady=5)
 
     main_label2 = Label(text="Координаты окна(окно должно быть выпуклое):")
     main_label2.grid(row=k + 3, column=0, columnspan=4)
 
     for i in range(j):
-        x.append(StringVar(0))
-        y.append(StringVar(0))
+        Info_x.append(StringVar(0))
+        Info_y.append(StringVar(0))
 
         x_label.append(Label(text="x:"))
         x_label[i + k].grid(row=k + 4 + i, column=0, sticky="w")
-        x_entry.append(Entry(textvariable=x[i + k]))
+        x_entry.append(Entry(textvariable=Info_x[i + k]))
         x_entry[i + k].grid(row=k + 4 + i, column=1, padx=5, pady=5)
         y_label.append(Label(text="y:"))
         y_label[i + k].grid(row=k + 4 + i, column=2, sticky="w")
-        y_entry.append(Entry(textvariable=y[i + k]))
+        y_entry.append(Entry(textvariable=Info_y[i + k]))
         y_entry[i + k].grid(row=k + 4 + i, column=3, padx=5, pady=5)
 
     message_button = Button(text="Draw", command=resolve)
@@ -175,23 +139,22 @@ def define_interface():
 
 
 def resolve():
-    # for i in range(len(x)):
-    #     x[i] = float(x[i].get())
-    #
-    # for i in range(len(y)):
-    #     y[i] = float(y[i].get())
-    #
-    # subjectPolygon = [[]]
-    # subjectPolygon.clear()
-    # k = int(subjectPolygon_tk.get())
-    # for i in range(k):
-    #     subjectPolygon.append([x[i], y[i]])
-    #
-    # clipPolygon = [[]]
-    # clipPolygon.clear()
-    # j = int(clipPolygon_tk.get())
-    # for i in range(j):
-    #     clipPolygon.append([x[i + k], y[i + k]])
+    plt.clf()
+    x = [float(data.get()) for data in Info_x]
+    y = [float(data.get()) for data in Info_y]
+
+    subjectPolygon = [[]]
+    subjectPolygon.clear()
+
+    k = int(subjectPolygon_tk.get())
+    for i in range(k):
+        subjectPolygon.append([x[i], y[i]])
+
+    clipPolygon = [[]]
+    clipPolygon.clear()
+    j = int(clipPolygon_tk.get())
+    for i in range(j):
+        clipPolygon.append([x[i + k], y[i + k]])
 
     # Test data
     # subjectPolygon = [[50., 150.],
@@ -209,70 +172,69 @@ def resolve():
     #                [300., 300.],
     #                [100., 300.], ]
 
-    subjectPolygon = [[115., 115.],
-                      [115., 140.],
-                      [140., 140.],
-                      [140., 115.]]
-
-    clipPolygon = [[100., 100.],
-                   [300., 100.],
-                   [300., 300.],
-                   [100., 300.]]
+    # subjectPolygon = [[115., 115.],
+    #                   [115., 140.],
+    #                   [140., 140.],
+    #                   [140., 115.]]
+    #
+    # clipPolygon = [[100., 100.],
+    #                [300., 100.],
+    #                [300., 300.],
+    #                [100., 300.]]
 
     figure_dot_array = [Dot(coord[0], coord[1]) for coord in subjectPolygon]
     # TODO -- convert_to_figure избыточен
     clip_area = convert_to_figure(clipPolygon)
     cv1 = clip(figure_dot_array, clip_area)
-    cv = clip_old(subjectPolygon, clipPolygon)
-    plt.clf()
-    print(cv)
     print(cv1)
     clipPolygon.append([clipPolygon[0][0], clipPolygon[0][1]])
-    cv.append([cv[0][0], cv[0][1]])
-    cv = np.array(cv)
+    subjectPolygon.append([subjectPolygon[0][0], subjectPolygon[0][1]])
+
     subjectPolygon = np.array(subjectPolygon)
     clipPolygon = np.array(clipPolygon)
-    plt.plot(subjectPolygon[:, 0], subjectPolygon[:, 1])
-    plt.plot(clipPolygon[:, 0], clipPolygon[:, 1])
-    plt.plot(cv[:, 0], cv[:, 1])
+    plt.plot(subjectPolygon[:, 0], subjectPolygon[:, 1], color="b", label="Исходный многоугольник")
+    plt.plot(clipPolygon[:, 0], clipPolygon[:, 1], color="y", label="Выпуклый многоугольник отсечения")
+    if len(cv1) != 0:
+        result = [[dot.x, dot.y] for dot in cv1]
+        result.append([result[0][0], result[0][1]])
+        result = np.array(result)
+        plt.plot(result[:, 0], result[:, 1], color="r", label="Обрезанная фигура")
 
     plt.minorticks_on()
     plt.xlabel('x')
     plt.ylabel('y')
     plt.xlim(-500, 500)
     plt.ylim(-500, 500)
+    plt.legend(loc="best")
     plt.show()
-    canvas = FigureCanvasTkAgg(plt, master=root)
-    canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-    canvas.draw()
+    # canvas = FigureCanvasTkAgg(plt, master=root)
+    # canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+    # canvas.draw()
 
 
-x = []
-y = []
+if __name__ == '__main__':
+    root = Tk()
+    w = root.winfo_screenwidth() // 2 - 200
+    h = root.winfo_screenheight() // 2 - 200
+    root.title("Лабораторная №2")
+    root.geometry("400x600+{}+{}".format(w, h))
+    root.resizable(False, False)
 
-root = Tk()
-w = root.winfo_screenwidth() // 2 - 200
-h = root.winfo_screenheight() // 2 - 200
-root.title("Лабораторная №2")
-root.geometry("400x600+{}+{}".format(w, h))
-root.resizable(False, False)
+    main_label = Label(text="")
+    main_label.grid(row=0, column=0, columnspan=4)
 
-main_label = Label(text="")
-main_label.grid(row=0, column=0, columnspan=4)
+    subjectPolygon_tk = StringVar(0)
+    clipPolygon_tk = StringVar(0)
 
-subjectPolygon_tk = StringVar(0)
-clipPolygon_tk = StringVar(0)
+    subjectPolygon_label = Label(text="Количество точек фигуры:")
+    subjectPolygon_label.grid(row=1, column=0, sticky="w")
+    subjectPolygon_entry = Entry(textvariable=subjectPolygon_tk)
+    subjectPolygon_entry.grid(row=1, column=1, padx=5, pady=5)
+    clipPolygon_label = Label(text="Количество точек окна:")
+    clipPolygon_label.grid(row=2, column=0, sticky="w")
+    clipPolygon_entry = Entry(textvariable=clipPolygon_tk)
+    clipPolygon_entry.grid(row=2, column=1, padx=5, pady=5)
+    message_button = Button(text="Next", command=define_interface)
+    message_button.grid(row=4, column=3, padx=5, pady=5, sticky="e")
 
-subjectPolygon_label = Label(text="Количество точек фигуры:")
-subjectPolygon_label.grid(row=1, column=0, sticky="w")
-subjectPolygon_entry = Entry(textvariable=subjectPolygon_tk)
-subjectPolygon_entry.grid(row=1, column=1, padx=5, pady=5)
-clipPolygon_label = Label(text="Количество точек окна:")
-clipPolygon_label.grid(row=2, column=0, sticky="w")
-clipPolygon_entry = Entry(textvariable=clipPolygon_tk)
-clipPolygon_entry.grid(row=2, column=1, padx=5, pady=5)
-
-message_button = Button(text="Next", command=define_interface)
-message_button.grid(row=4, column=3, padx=5, pady=5, sticky="e")
-
-root.mainloop()
+    root.mainloop()
