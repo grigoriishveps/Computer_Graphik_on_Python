@@ -7,10 +7,10 @@ print("use basic coords y,n?")
 # start = input()
 start = 'y'
 if (start == "y"):
-    x1, y1, z1 = 0, 0, 1
-    x2, y2, z2 = 1, 1, 1
-    x3, y3, z3 = 0, 1, 0
-    x4, y4, z4 = 1, 0, 0
+    x1, y1, z1 = 0, 0, 10
+    x2, y2, z2 = 10, 10, 10
+    x3, y3, z3 = 0, 10, 0
+    x4, y4, z4 = 10, 0, 0
 else:
     print("Input bilinear coords")
     print("Input x1,y1,z1")
@@ -83,11 +83,11 @@ ax.set_zlabel('axis Z')
 
 # расставляем заданные опорные точки в сцене.
 for i in range(4):
-    ax.scatter(assotiationСoordSystem[i][0], assotiationСoordSystem[i][1], assotiationСoordSystem[i][2])
+    ax.scatter(assotiationСoordSystem[i][0], assotiationСoordSystem[i][1], assotiationСoordSystem[i][2], marker = 'o')
 ax.plot(X, Y, Z)
 
 # количество точек на поверхности от 0 до 1, в количестве N
-dots = np.linspace(0, 1, 15)
+dots = np.linspace(0, 1, 30)
 
 # декартово произведение всех возможных точек билинейной поверхности
 buf = np.transpose([np.tile(dots, len(dots)), np.repeat(dots, len(dots))])
@@ -95,6 +95,6 @@ buf = np.transpose([np.tile(dots, len(dots)), np.repeat(dots, len(dots))])
 # цикл отрисовки каждой точки билинейной повехрности
 for i in range(len(buf)):
     xyz = f(buf[i][0], buf[i][1], assotiationСoordSystem)
-    ax.scatter(xyz[0], xyz[1], xyz[2])
+    ax.scatter(xyz[0], xyz[1], xyz[2],marker = '.')
 
 plt.show()
