@@ -25,9 +25,7 @@ def insidetriangle(xList, yList):
 
     return X[triangle], Y[triangle]
 
-
 # с помощью линейного решателя находим уравнение плоскости #треугольника в пространстве, и выражаем его через Z.
-
 
 XListFir = [1 + 50, 100 + 50, 50]
 YListFir = [10, 50, 250]
