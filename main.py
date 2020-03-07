@@ -1,118 +1,136 @@
 import numpy as np
-from scipy import interpolate
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-import sys
+from mpl_toolkits.mplot3d import axes3d
+import pygame
+
+def insidetriangle(xList, yList):
+    xs = xList
+    ys = yList
+    x_range = np.arange(np.min(xs), np.max(xs) + 1)
+    y_range = np.arange(np.min(ys), np.max(ys) + 1)
+
+    X, Y = np.meshgrid(x_range, y_range)
+    xc = np.mean(xs)
+    yc = np.mean(ys)
+
+    triangle = np.ones(X.shape, dtype=bool)
+    for i in range(3):
+        ii = (i + 1) % 3
+    if xs[i] == xs[ii]:
+        include = X * (xc - xs[i]) / abs(xc - xs[i]) > xs[i] * (xc - xs[i]) / abs(xc - xs[i])
+    else:
+        poly = np.poly1d([(ys[ii] - ys[i]) / (xs[ii] - xs[i]), ys[i] - xs[i] * (ys[ii] - ys[i]) / (xs[ii] - xs[i])])
+        include = Y * (yc - poly(xc)) / abs(yc - poly(xc)) > poly(X) * (yc - poly(xc)) / abs(yc - poly(xc))
+    triangle *= include
+
+    return X[triangle], Y[triangle]
 
 
-class mywindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.lelist = []
-        self.initUI()
-
-    def initUI(self):
-        mainWidget = self
-        mainbox = QVBoxLayout()
-        mainWidget.setLayout(mainbox)
-        ctr = [(50, 25), (59, 12), (50, 10), (57, 2), (40, 4), (40, 14), (43, 17)]
-        for i in range(1, 8):
-            le1 = QLineEdit()
-            le2 = QLineEdit()
-
-            le1.setText(str(ctr[i - 1][0]))
-            le2.setText(str(ctr[i - 1][1]))
-            self.lelist.append([le1, le2])
-            box = QHBoxLayout()
-            box.addWidget(QLabel("x" + str(i)))
-            box.addWidget(le1)
-            box.addWidget(QLabel("y" + str(i)))
-            box.addWidget(le2)
-            mainbox.addLayout(box)
-
-        buttonDraw = QPushButton('Draw')
-        buttonDraw.resize(buttonDraw.sizeHint())
-        buttonDraw.clicked.connect(self.drawFun)
-
-        boxButtons = QHBoxLayout()
-        boxButtons.addStretch(1)
-        boxButtons.addWidget(buttonDraw)
-        mainbox.addStretch(1)
-        mainbox.addLayout(boxButtons)
-        mainWidget.setGeometry(300, 300, 300, 200)
-        mainWidget.setWindowTitle('Menubar')
-        mainWidget.show()
-
-    def drawFun(self):
-        def b_coefficients(t, k, i, x):
-            """
-            :param t: Параметр функции
-            :type t:
-            :param k: Степень
-            :type k:
-            :param i: Индекс
-            :type i:
-            :param x: значения узлового вектора
-            :type x:
-            :return:
-            :rtype:
-            """
-            if k == 0:
-                return 1.0 if x[i] <= t < x[i + 1] else 0.0
-            if x[i + k] == x[i]:
-                c1 = 0.0
-            else:
-                c1 = (t - x[i]) / (x[i + k] - x[i]) * b_coefficients(t, k - 1, i, x)
-            if x[i + k + 1] == x[i + 1]:
-                c2 = 0.0
-            else:
-                c2 = (x[i + k + 1] - t) / (x[i + k + 1] - x[i + 1]) * b_coefficients(t, k - 1, i + 1, x)
-            return c1 + c2
-
-        def bspline(t, x, c, k):
-            n = len(x) - k - 1
-            assert (n >= k + 1) and (len(c) >= n)
-            return sum(c[i] * b_coefficients(t, k, i, x) for i in range(n))
-
-        def computer_and_draw_bspline(x, y):
-            plt.close()
-            colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
-            length = len(x)
-            u3 = np.linspace(0, 1, 70, endpoint=False)
-            plt.plot(x, y, 'k--', label='Control polygon', marker='o', markerfacecolor='red')
-            plt.axis([min(x) - 1, max(x) + 1, min(y) - 1, max(y) + 1])
-            plt.title('Cubic B-spline curve evaluation')
-            for k in range(1, 7):
-                number_of_internal_knots = length - k + 1
-                knot_vector = np.linspace(0, 1, number_of_internal_knots, endpoint=True)
-                knot_vector = np.append([0] * k, knot_vector)
-                knot_vector = np.append(knot_vector, [1] * k)
-                plt.plot([bspline(z, knot_vector, x.tolist(), k) for z in u3],
-                         [bspline(z, knot_vector, y.tolist(), k) for z in u3],
-                         colors[k - 1], lw=2, label=f'B-spline curve {k} degree')
-            plt.legend(loc='upper right')
-            plt.show()
-
-        ctr = np.array(self.lelist)
-        x = ctr[:, 0]
-        y = ctr[:, 1]
-
-        x = list(map(lambda x : int(x.text()), x))
-        x = np.array(x)
-        y = list(map(lambda x : int(x.text()), y))
-        y = np.array(y)
-        print(x)
-        print(y)
-        computer_and_draw_bspline(x, y)
+# с помощью линейного решателя находим уравнение плоскости #треугольника в пространстве, и выражаем его через Z.
 
 
-# https://github.com/kawache/Python-B-spline-examples
-# TODO: -- change coordinates online
-# workable
-# Разобраться с узловым вектором
+XListFir = [1 + 50, 100 + 50, 50]
+YListFir = [10, 50, 250]
+ZListFir = [50, 50, -10]
 
-app = QApplication(sys.argv)
-ms = mywindow()
-sys.exit(app.exec_())
+XListSec = [1, 100, 50]
+YListSec = [25, 45, 450]
+ZListSec = [5, 5, -9]
+
+x1 = XListFir[:]
+x1.append(XListFir[0])
+y1 = YListFir[:]
+y1.append(YListFir[0])
+z1 = ZListFir[:]
+z1.append(ZListFir[0])
+
+# Отрисовка заданных ранее треугольников.
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# отдаем функции дискретизации координаты проекции треугольника на XoY.
+bufferFirstTriangle = insidetriangle(XListFir, YListFir)
+bufferSecondTriangle = insidetriangle(XListSec, YListSec)
+
+massX = bufferFirstTriangle[0]
+massY = bufferFirstTriangle[1]
+
+massX2 = bufferSecondTriangle[0]
+massY2 = bufferSecondTriangle[1]
+
+print(bufferFirstTriangle)
+print(massX)
+print(massY)
+
+# Находим плоскость полигона
+coord = [
+    [XListFir[0], YListFir[0], 1],
+    [XListFir[1], YListFir[1], 1],
+    [XListFir[2], YListFir[2], 1],  # it XYZ COORDS
+    ZListFir  # IT FULL Z COORDS
+]
+coord2 = [
+    [XListSec[0], YListSec[0], 1],
+    [XListSec[1], YListSec[1], 1],
+    [XListSec[2], YListSec[2], 1],  # it XYZ COORDS
+    ZListSec  # IT FULL Z COORDS
+]
+
+
+def ploskost(coord):
+    M5 = np.array([coord[0], coord[1], coord[2]])  # Матрица (левая часть)(3 координаты)
+    v5 = np.array(coord[3])  # Вектор (правая часть)
+    result = np.linalg.solve(M5, v5)
+    return [round(elem, 2) for elem in result]
+
+
+urPloskosti = ploskost(coord)  # ур.плоскости 1 треугольника
+urPloskosti2 = ploskost(coord2)  # ур.плоскости 2 треугольника
+
+print(urPloskosti)
+
+
+# функция получения z координаты по 2 координатам проекции и уравнению плоскости #фигуры
+def getZcoord(x, y, urPloskosti):
+    return float(urPloskosti[0] * x + urPloskosti[1] * y + urPloskosti[2])
+
+
+WIDTH = 500
+
+pygame.init()
+sc = pygame.display.set_mode((400, 500))
+
+# здесь будут рисоваться фигуры
+zbuff = [[-10000] * WIDTH for i in range(WIDTH)]  # инициализируем z-буфер “бесконечным” значением (-10000)
+pygame.time.delay(100)
+
+for i in pygame.event.get():
+    if i.type == pygame.QUIT:
+        exit()
+
+# для каждой ранее дискретизированной точки находим значение глубины (Z-#координаты) и записываем по координатам дискретной точки в z-буфер отображаемый #цвет фигуры. В нашем случае 1 – RED, 2-GREEN.
+
+for i in range(len(massX)):
+    if (getZcoord(massX[i], massY[i], urPloskosti) > zbuff[int(massX[i])][int(massY[i])]):
+        zbuff[int(massX[i])][int(massY[i])] = 1.
+
+for i in range(len(massX2)):
+    if (getZcoord(massX2[i], massY2[i], urPloskosti2) > zbuff[int(massX2[i])][int(massY2[i])]):
+        zbuff[int(massX2[i])][int(massY2[i])] = 2.
+
+for i in range(len(zbuff)):
+    for j in range(len(zbuff)):
+        if (zbuff[i][j] == 1):
+            #print("work")
+            pygame.draw.line(sc, (255, 0, 0), [i, j], [i, j], 3)
+        if (zbuff[i][j] == 2):
+            #print("work")
+            pygame.draw.line(sc, (0, 255, 0), [i, j], [i, j], 3)
+
+pygame.display.update()
+input()
+
+# вывод содержания z-буфера.
+for i in range(zbuff.__len__()):
+    print(zbuff[i])
 

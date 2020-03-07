@@ -1,8 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 
 class mywindow(QWidget):
     def __init__(self):
