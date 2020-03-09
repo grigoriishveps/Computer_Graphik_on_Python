@@ -216,8 +216,8 @@ if __name__ == '__main__':
     root = Tk()
     w = root.winfo_screenwidth() // 2 - 200
     h = root.winfo_screenheight() // 2 - 200
-    root.title("Лабораторная №2")
-    root.geometry("400x600+{}+{}".format(w, h))
+    root.title("Лабораторная №")
+    root.geometry("400x400+{}+{}".format(w, h))
     root.resizable(False, False)
 
     main_label = Label(text="")
